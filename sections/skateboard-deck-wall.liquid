@@ -1,0 +1,104 @@
+{%- liquid
+  assign decks = section.settings.collection
+  assign title = section.settings.title | default: decks.title
+-%}
+{%- if decks != blank and decks.products_count > 0 -%}
+  {{ 'twelve-deck-studio.css' | asset_url | stylesheet_tag }}
+  <script src="{{ 'twelve-deck-studio.js' | asset_url }}" defer></script>
+  <twelve-deck-studio class="tbs-studio" style="--studio-base: {{ section.settings.panel_color }}; --studio-accent: {{ section.settings.accent_color }}">
+    <section aria-labelledby="DeckWall-{{ section.id }}">
+      <header class="tbs-studio__header">
+        <h2 id="DeckWall-{{ section.id }}">{{ title | escape }}</h2>
+        <a href="{{ decks.url }}">{{ section.settings.shop_label | escape }} ({{ decks.all_products_count }}) <span aria-hidden="true">↗</span></a>
+      </header>
+      <div class="tbs-studio__floor">
+        <ul class="tbs-studio__lineup" id="DeckLineup-{{ section.id }}" aria-labelledby="DeckWall-{{ section.id }}" tabindex="0">
+          {%- for product in decks.products limit: section.settings.product_limit -%}
+            {%- assign variant = product.selected_or_first_available_variant | default: product.variants.first -%}
+            <li class="tbs-studio__slot">
+              <a class="tbs-studio__hit" href="{{ product.url }}" aria-haspopup="dialog">
+                <span class="tbs-studio__stage" aria-hidden="true">
+                  {%- if product.featured_image -%}
+                    {%- assign image_loading = 'lazy' -%}
+                    {%- if forloop.index <= 5 -%}{%- assign image_loading = 'eager' -%}{%- endif -%}
+                    {{ product.featured_image | image_url: width: 640 | image_tag: widths: '400, 640', sizes: '400px', loading: image_loading, class: 'tbs-studio__source', crossorigin: 'anonymous', alt: '' }}
+                  {%- else -%}
+                    {{ 'product-1' | placeholder_svg_tag: 'tbs-studio__placeholder' }}
+                  {%- endif -%}
+                </span>
+                <span class="tbs-studio__caption">
+                  <span class="tbs-studio__name">{{ product.title | escape }}</span>
+                  <span class="tbs-studio__price">
+                    {%- if product.price_varies -%}
+                      {%- assign price_min = product.price_min | money -%}{{ 'collection.product.from_price_html' | t: price_min: price_min }}
+                    {%- else -%}{{ product.price | money }}{%- endif -%}
+                    {%- unless product.available %} · {{ 'collection.product.sold_out' | t }}{% endunless -%}
+                  </span>
+                  <span class="tbs-studio__plus" aria-hidden="true">+</span>
+                </span>
+              </a>
+              <template class="tbs-studio__detail">
+                <div class="tbs-studio__detail-layout">
+                  <div class="tbs-studio__inspect">
+                    <div class="tbs-studio__viewer"></div>
+                    <button class="tbs-studio__turn" type="button" aria-pressed="false">Turn deck <span aria-hidden="true">⟳</span></button>
+                  </div>
+                  <div class="tbs-studio__details">
+                    <span class="tbs-studio__brand">{{ product.vendor | escape }}</span>
+                    <h2>{{ product.title | escape }}</h2>
+                    <p class="tbs-studio__detail-price"><strong data-price>{{ variant.price | money }}</strong> <s data-compare{% unless variant.compare_at_price > variant.price %} hidden{% endunless %}>{{ variant.compare_at_price | money }}</s></p>
+                    <form action="{{ routes.cart_add_url }}" method="post">
+                      {%- if product.has_only_default_variant -%}
+                        <input type="hidden" name="id" value="{{ variant.id }}">
+                      {%- else -%}
+                        <label class="tbs-studio__field">{{ product.options | join: ' / ' | escape }}
+                          <select name="id">
+                            {%- for option in product.variants -%}
+                              <option value="{{ option.id }}"{% if option.id == variant.id %} selected{% endif %} data-available="{{ option.available }}" data-price="{{ option.price | money | escape }}" data-compare="{% if option.compare_at_price > option.price %}{{ option.compare_at_price | money | escape }}{% endif %}" data-min="{{ option.quantity_rule.min | default: 1 }}">{{ option.title | escape }}{% unless option.available %} — {{ 'collection.product.sold_out' | t }}{% endunless %}</option>
+                            {%- endfor -%}
+                          </select>
+                        </label>
+                      {%- endif -%}
+                      <input type="hidden" name="quantity" value="{{ variant.quantity_rule.min | default: 1 }}">
+                      <button class="tbs-studio__buy" type="submit" data-buy="{{ 'product.form.add_to_cart' | t | escape }}" data-sold="{{ 'collection.product.sold_out' | t | escape }}"{% unless variant.available %} disabled{% endunless %}>
+                        {% if variant.available %}{{ 'product.form.add_to_cart' | t }}{% else %}{{ 'collection.product.sold_out' | t }}{% endif %}
+                      </button>
+                    </form>
+                    <a class="tbs-studio__full" href="{{ product.url }}">Full product details <span aria-hidden="true">↗</span></a>
+                  </div>
+                </div>
+              </template>
+            </li>
+          {%- endfor -%}
+        </ul>
+      </div>
+      <footer class="tbs-studio__foot">
+        <span class="tbs-studio__hint"><span class="tbs-studio__mouse">Hover to turn · Click to open</span><span class="tbs-studio__touch">Swipe to browse · Tap a deck</span></span>
+        <div class="tbs-studio__paging" hidden>
+          <button type="button" data-step="-1" aria-controls="DeckLineup-{{ section.id }}" aria-label="{{ 'general.accessibility.previous' | t | escape }}">←</button>
+          <button type="button" data-step="1" aria-controls="DeckLineup-{{ section.id }}" aria-label="{{ 'general.accessibility.next' | t | escape }}">→</button>
+        </div>
+      </footer>
+    </section>
+    <dialog class="tbs-studio__dialog" aria-label="Deck quick view">
+      <button type="button" class="tbs-studio__close" aria-label="{{ 'general.accessibility.close' | t | escape }}" autofocus>×</button>
+      <div class="tbs-studio__body"></div>
+    </dialog>
+  </twelve-deck-studio>
+{%- elsif request.design_mode -%}
+  <p class="container">Choose a collection with products to display the deck wall.</p>
+{%- endif -%}
+{% schema %}
+{
+  "name": "3D skateboard deck wall",
+  "settings": [
+    { "type": "collection", "id": "collection", "label": "Collection" },
+    { "type": "text", "id": "title", "label": "Heading", "default": "The deck wall" },
+    { "type": "text", "id": "shop_label", "label": "Collection link", "default": "Shop all decks" },
+    { "type": "range", "id": "product_limit", "label": "Decks on display", "min": 2, "max": 16, "step": 1, "default": 8 },
+    { "type": "color", "id": "panel_color", "label": "Studio background", "default": "#18221f" },
+    { "type": "color", "id": "accent_color", "label": "Highlight", "default": "#d9f787" }
+  ],
+  "presets": [{ "name": "3D skateboard deck wall" }]
+}
+{% endschema %}

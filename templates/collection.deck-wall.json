@@ -1,0 +1,14 @@
+{
+  "sections": {
+    "wall": {
+      "type": "skateboard-deck-wall",
+      "settings": {
+        "collection": "skateboard-decks",
+        "title": "The deck wall",
+        "shop_label": "Shop all decks",
+        "product_limit": 8
+      }
+    }
+  },
+  "order": ["wall"]
+}
