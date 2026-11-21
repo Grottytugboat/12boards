@@ -2,12 +2,12 @@
   "schemaVersion": 1,
   "projectId": "twelve-board-store",
   "repository": "Grottytugboat/12boards",
-  "ref": null,
-  "headSha": null,
-  "headUrl": null,
-  "committedAt": null,
-  "subject": null,
-  "actor": null,
-  "changedFiles": 0,
-  "recordedAt": null
+  "ref": "refs/heads/main",
+  "headSha": "b48086b409a86a8d337cfb87f7e0b723b330282a",
+  "headUrl": "https://github.com/Grottytugboat/12boards/commit/b48086b409a86a8d337cfb87f7e0b723b330282a",
+  "committedAt": "2026-11-21T22:04:37Z",
+  "subject": "Add shared project memory; keep hosted sync pending approval",
+  "actor": "Grottytugboat",
+  "changedFiles": 9,
+  "recordedAt": "2026-11-21T22:04:37Z"
 }
