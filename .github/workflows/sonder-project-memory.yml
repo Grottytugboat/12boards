@@ -1,0 +1,86 @@
+name: Sonder project memory
+
+on:
+  push:
+    branches: ['**']
+    paths-ignore:
+      - '.sonder/activity.json'
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Serializes this workflow for each ref. New human pushes still need the head
+# check below. The server also rejects stale/idempotent record updates.
+concurrency:
+  group: sonder-project-memory-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    name: Validate project memory
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4, verified 2026-11-21
+        with:
+          persist-credentials: false
+      - name: Validate identities, schemas and evidence structure
+        run: python3 .sonder/memory.py validate
+
+  activity:
+    name: Record Git activity
+    needs: validate
+    if: github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+      - name: Update the generated file only if the push is still current
+        shell: bash
+        run: |
+          set -euo pipefail
+          current="$(git ls-remote --heads origin "$GITHUB_REF" | cut -f1)"
+          if [ "$current" != "$GITHUB_SHA" ]; then
+            echo "A newer commit is present; skipping this stale activity writer."
+            exit 0
+          fi
+          python3 .sonder/memory.py activity --fetch-base
+          if git diff --quiet -- .sonder/activity.json; then
+            exit 0
+          fi
+          git add -- .sonder/activity.json
+          git -c user.name='github-actions[bot]' \
+              -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+              commit -m 'chore: record Sonder project activity'
+          # Normal fast-forward push only. A rejected/racing push fails visibly;
+          # do not force, retry stale data, weaken protection or introduce a PAT.
+          git push origin "HEAD:$GITHUB_REF"
+
+  sync:
+    name: Sync optional Conatus records
+    needs: validate
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+          # The read-only job token permits a bounded fetch of an older push base
+          # in private repos; it is removed with the ephemeral runner checkout.
+          persist-credentials: true
+      - name: Sync the exact event commit using GitHub OIDC
+        # No model/API key or long-lived provider secret. Disabled by default
+        # in .sonder/automation.json. Tokens never enter files or console output.
+        run: python3 .sonder/memory.py sync --fetch-base

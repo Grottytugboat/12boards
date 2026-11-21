@@ -1,0 +1,54 @@
+{
+  "$schema": "./project.schema.json",
+  "schemaVersion": 1,
+  "projectId": "twelve-board-store",
+  "name": "Twelve Board Store theme | 12boards",
+  "repository": "Grottytugboat/12boards",
+  "sourceOfTruth": {
+    "tasks": "https://chatgpt.com/space/page_1ccdd86738d08191b5785f134dd12faf",
+    "businessContext": "https://github.com/Grottytugboat/sonder-knowledge",
+    "execution": null
+  },
+  "facts": [
+    {
+      "text": "The README identifies the Twelve Boards Shopify Theme and a mini-cart implementation.",
+      "evidence": [
+        {
+          "url": "https://github.com/Grottytugboat/12boards/blob/8a628fa54c38573a9b7df71f4c0ee7e381cfb4bf/README.md",
+          "kind": "source-record",
+          "checkedAt": "2026-11-21T21:26:13Z"
+        }
+      ]
+    },
+    {
+      "text": "The README documents theme installation through Shopify GitHub integration. Current live connection state was not queried.",
+      "evidence": [
+        {
+          "url": "https://github.com/Grottytugboat/12boards/blob/8a628fa54c38573a9b7df71f4c0ee7e381cfb4bf/README.md",
+          "kind": "source-record",
+          "checkedAt": "2026-11-21T21:26:13Z"
+        }
+      ]
+    }
+  ],
+  "status": "unknown",
+  "statusSummary": "Repository purpose is verified. Overall delivery status and production health are not established by this documentation snapshot.",
+  "nextAction": {
+    "text": "Confirm the scope and active Shopify theme connection before selecting work in this repository; no current repository-specific task was verified.",
+    "owner": null,
+    "kind": "suggested"
+  },
+  "needsTim": null,
+  "needsTimReason": null,
+  "readyForReview": null,
+  "reviewSummary": null,
+  "updatedAt": "2026-11-21T21:34:25Z",
+  "updatedBy": "ChatGPT source audit",
+  "evidence": [
+    {
+      "url": "https://github.com/Grottytugboat/12boards/blob/8a628fa54c38573a9b7df71f4c0ee7e381cfb4bf/README.md",
+      "kind": "source-record",
+      "checkedAt": "2026-11-21T21:26:13Z"
+    }
+  ]
+}

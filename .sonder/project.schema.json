@@ -1,0 +1,253 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Sonder semantic project record v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "schemaVersion",
+    "projectId",
+    "name",
+    "repository",
+    "sourceOfTruth",
+    "facts",
+    "status",
+    "statusSummary",
+    "nextAction",
+    "needsTim",
+    "needsTimReason",
+    "readyForReview",
+    "reviewSummary",
+    "updatedAt",
+    "updatedBy",
+    "evidence"
+  ],
+  "properties": {
+    "$schema": {
+      "const": "./project.schema.json"
+    },
+    "schemaVersion": {
+      "const": 1
+    },
+    "projectId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80,
+      "pattern": "^[a-z0-9][a-z0-9_-]{1,79}$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "repository": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 180,
+      "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+    },
+    "sourceOfTruth": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tasks",
+        "businessContext",
+        "execution"
+      ],
+      "properties": {
+        "tasks": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048,
+          "format": "uri"
+        },
+        "businessContext": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048,
+          "format": "uri"
+        },
+        "execution": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 2048,
+          "format": "uri"
+        }
+      }
+    },
+    "facts": {
+      "type": "array",
+      "maxItems": 40,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "text",
+          "evidence"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "evidence": {
+            "type": "array",
+            "maxItems": 40,
+            "items": {
+              "$ref": "#/$defs/evidence"
+            },
+            "minItems": 1
+          }
+        }
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "unknown",
+        "planned",
+        "in-progress",
+        "blocked",
+        "paused",
+        "review",
+        "shipped",
+        "archived"
+      ]
+    },
+    "statusSummary": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "nextAction": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "text",
+        "owner",
+        "kind"
+      ],
+      "properties": {
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "owner": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "suggested",
+            "agreed"
+          ]
+        }
+      }
+    },
+    "needsTim": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "needsTimReason": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "maxLength": 1000
+    },
+    "readyForReview": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "reviewSummary": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "maxLength": 1500
+    },
+    "updatedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "maxLength": 27,
+      "format": "date-time"
+    },
+    "updatedBy": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "evidence": {
+      "type": "array",
+      "maxItems": 40,
+      "items": {
+        "$ref": "#/$defs/evidence"
+      }
+    }
+  },
+  "$defs": {
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "url",
+        "kind",
+        "checkedAt"
+      ],
+      "properties": {
+        "url": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048,
+          "format": "uri"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "user-direction",
+            "source-record",
+            "code",
+            "test",
+            "preview",
+            "deployment",
+            "business-outcome"
+          ]
+        },
+        "checkedAt": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 27,
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}
